@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QueryRoute: Databases and Networks Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#140f3a;--bg2:#1f1858;--ink:#f4f1ff;--mute:#a9a3d6;--db:#3fe0d0;--net:#ff6b5e;--gold:#ffd66b;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);--a:var(--db)}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:radial-gradient(1200px 700px at 80% -10%,#3b2a9a 0%,transparent 60%),radial-gradient(900px 600px at 0% 110%,#7a2a62 0%,transparent 55%),var(--bg);line-height:1.5;overflow-x:hidden}
+#bg{position:fixed;inset:0;z-index:0}
+main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:clamp(20px,5vw,56px) 20px}
+section{display:none}section.on{display:block}
+h1,h2,h3{font-family:'Bricolage Grotesque',system-ui,sans-serif;line-height:1.05}
+.brand{font:800 1.1rem 'Bricolage Grotesque',sans-serif;display:flex;gap:10px;align-items:center;margin-bottom:clamp(30px,8vh,80px)}
+.brand i{width:14px;height:14px;border-radius:50%;background:var(--db);box-shadow:22px 0 0 var(--net),11px -9px 0 var(--gold);margin-right:24px}
+h1{font-size:clamp(2.6rem,8vw,5.6rem);font-weight:800;letter-spacing:-.03em;max-width:12ch}
+h1 span{background:linear-gradient(90deg,var(--db),var(--gold) 50%,var(--net));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--mute);font-size:1.15rem;max-width:46ch;margin:22px 0 40px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.mode{all:unset;box-sizing:border-box;cursor:pointer;padding:24px;border-radius:28px 28px 28px 6px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(10px);transition:transform .25s,border-color .25s,background .25s;position:relative;overflow:hidden}
+.mode:nth-child(2){border-radius:28px 28px 6px 28px}
+.mode:nth-child(3){border-radius:6px 28px 28px 28px}
+.mode::after{content:"";position:absolute;right:-40px;top:-40px;width:130px;height:130px;border-radius:50%;background:var(--c);opacity:.22;filter:blur(8px);transition:opacity .25s,transform .25s}
+.mode:hover,.mode:focus-visible{transform:translateY(-6px);border-color:var(--c);background:rgba(255,255,255,.1)}
+.mode:hover::after{opacity:.5;transform:scale(1.3)}
+.mode h3{font-size:1.7rem;margin-bottom:6px;color:var(--c)}
+.mode p{color:var(--mute);font-size:.95rem}
+.mode b{display:inline-block;margin-top:16px;font-size:.85rem;color:var(--ink)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:26px;color:var(--mute);font-size:.95rem}
+.track{display:flex;align-items:center;gap:6px;flex:1;max-width:420px}
+.track span{flex:1;height:6px;border-radius:6px;background:var(--line);position:relative;transition:background .4s}
+.track span.ok{background:var(--db)}.track span.bad{background:var(--net)}
+.track span.cur{background:var(--a);box-shadow:0 0 14px var(--a);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.45}}
+.tag{display:inline-block;padding:5px 14px;border-radius:99px;border:1px solid var(--a);color:var(--a);font-weight:700;font-size:.85rem;margin-bottom:18px}
+.q{font-size:clamp(1.7rem,4.6vw,2.8rem);font-weight:800;letter-spacing:-.02em;max-width:24ch}
+.opts{display:grid;gap:12px;margin:32px 0 20px;max-width:680px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:16px;align-items:center;padding:16px 20px;border-radius:18px;background:var(--card);border:1px solid var(--line);transition:transform .2s,border-color .2s,background .2s}
+.opt kbd{font:700 .9rem 'DM Sans';width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.1);flex:none}
+.opt:hover:not([disabled]),.opt:focus-visible{transform:translateX(8px);border-color:var(--a)}
+.opt[disabled]{cursor:default}
+.opt.right{background:rgba(63,224,208,.18);border-color:var(--db)}
+.opt.wrong{background:rgba(255,107,94,.18);border-color:var(--net);animation:shake .35s}
+.opt.dim{opacity:.45}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.why{max-width:680px;padding:16px 20px;border-left:4px solid var(--gold);background:rgba(255,214,107,.08);border-radius:4px 14px 14px 4px;color:#fff3cf;display:none}
+.why.on{display:block}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;margin-top:22px;padding:15px 30px;border-radius:99px;background:var(--gold);color:#2a1f00;font-weight:700;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(255,214,107,.35)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);margin-left:10px}
+.btn[hidden]{display:none}
+.ring{width:200px;height:200px;position:relative;margin:30px 0}
+.ring svg{transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:14;stroke-linecap:round}
+.ring .bgc{stroke:var(--line)}
+.ring .fg{stroke:url(#g);transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)}
+.ring div{position:absolute;inset:0;display:grid;place-items:center;font:800 3rem 'Bricolage Grotesque'}
+.split{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.split div{padding:14px 20px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.split b{font-size:1.4rem}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<main>
+
+<section id="home" class="on">
+  <div class="brand"><i></i>QueryRoute</div>
+  <h1>Query it. <span>Route it.</span> Know it.</h1>
+  <p class="lead">Ten questions per topic on databases and computer networks. Pick a track and see how far your packet travels.</p>
+  <div class="modes">
+    <button class="mode" style="--c:var(--db)" data-m="db"><h3>Databases</h3><p>SQL, keys, normalization, transactions and indexing.</p><b>Start 10 questions</b></button>
+    <button class="mode" style="--c:var(--net)" data-m="net"><h3>Networks</h3><p>OSI layers, TCP/IP, DNS, ports and addressing.</p><b>Start 10 questions</b></button>
+    <button class="mode" style="--c:var(--gold)" data-m="mix"><h3>Mixed</h3><p>A shuffled run of both topics, 10 questions.</p><b>Start mixed run</b></button>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="top"><div class="track" id="track"></div><div id="score">Score 0</div></div>
+  <div class="tag" id="tag"></div>
+  <h2 class="q" id="q"></h2>
+  <div class="opts" id="opts"></div>
+  <div class="why" id="why"></div>
+  <button class="btn" id="next" hidden>Next question</button>
+</section>
+
+<section id="end">
+  <div class="brand"><i></i>QueryRoute</div>
+  <h2 id="msg" style="font-size:clamp(2rem,6vw,3.6rem);max-width:16ch"></h2>
+  <div class="ring"><svg width="200" height="200" viewBox="0 0 200 200"><defs><linearGradient id="g"><stop offset="0" stop-color="#3fe0d0"/><stop offset="1" stop-color="#ff6b5e"/></linearGradient></defs><circle class="bgc" cx="100" cy="100" r="86"/><circle class="fg" id="fg" cx="100" cy="100" r="86" stroke-dasharray="540.4" stroke-dashoffset="540.4"/></svg><div id="pct"></div></div>
+  <div class="split" id="split"></div>
+  <button class="btn" id="again">Play again</button><button class="btn ghost" id="home2">Choose a track</button>
+</section>
+
+</main>
+<script>
+/* ---------- Questions: first option is always the correct one, order is shuffled at runtime ---------- */
+const DB=[
+["Which SQL clause filters groups after GROUP BY?",["HAVING","WHERE","ORDER BY","LIMIT"],"WHERE filters rows before grouping. HAVING filters the groups themselves."],
+["Which normal form removes partial dependencies?",["2NF","1NF","BCNF","4NF"],"2NF requires every non-key column to depend on the whole primary key, not just part of it."],
+["What does the I in ACID stand for?",["Isolation","Integrity","Indexing","Inheritance"],"Isolation means concurrent transactions do not see each other's unfinished work."],
+["Which key uniquely identifies each row in a table?",["Primary key","Foreign key","Composite index","Candidate view"],"A primary key is unique and not null, and identifies exactly one row."],
+["Which join returns all rows from the left table plus matches from the right?",["LEFT JOIN","INNER JOIN","CROSS JOIN","SELF JOIN"],"Unmatched left rows still appear, with NULLs in the right-hand columns."],
+["Why do we create an index on a column?",["To speed up lookups","To save disk space","To enforce ACID","To encrypt the column"],"An index (often a B-tree) avoids scanning the whole table, at the cost of slower writes."],
+["Which of these is a DDL command?",["CREATE TABLE","SELECT","INSERT","COMMIT"],"DDL defines structure: CREATE, ALTER, DROP. SELECT and INSERT are DML."],
+["What does a foreign key enforce?",["Referential integrity","Row ordering","Column encryption","Query caching"],"It guarantees a value must exist in the referenced parent table."],
+["Which command makes a transaction's changes permanent?",["COMMIT","ROLLBACK","SAVEPOINT","TRUNCATE"],"COMMIT saves changes. ROLLBACK undoes them."],
+["Which type of database stores data as key-value pairs or documents?",["NoSQL","Relational","Star schema","Data warehouse"],"NoSQL stores such as Redis and MongoDB trade fixed schemas for flexibility and scale."]
+];
+const NET=[
+["Which OSI layer is responsible for routing packets between networks?",["Network layer","Data link layer","Transport layer","Session layer"],"Layer 3 uses IP addresses to route packets across networks."],
+["What is the default port for HTTPS?",["443","80","21","25"],"HTTP uses 80, FTP 21 and SMTP 25. HTTPS uses 443."],
+["Which protocol is connection-oriented and reliable?",["TCP","UDP","ICMP","ARP"],"TCP sets up a connection, acknowledges data and retransmits losses. UDP does not."],
+["What does DNS do?",["Maps domain names to IP addresses","Assigns IP addresses","Encrypts web traffic","Filters spam"],"DNS is the internet's phone book: example.com becomes an IP address."],
+["Which protocol automatically assigns IP addresses to devices?",["DHCP","DNS","NAT","SNMP"],"DHCP leases an address, gateway and DNS server to a device joining the network."],
+["How many bits are in an IPv4 address?",["32","64","128","16"],"IPv4 uses 32 bits. IPv6 uses 128."],
+["Which device forwards packets between different networks using IP addresses?",["Router","Hub","Repeater","Switch"],"Switches work inside a LAN by MAC address. Routers connect networks by IP."],
+["What is the TCP three-way handshake?",["SYN, SYN-ACK, ACK","ACK, SYN, FIN","SYN, ACK, FIN","HELLO, OK, GO"],"Both sides agree on sequence numbers before any data is sent."],
+["Which protocol resolves an IP address to a MAC address on a LAN?",["ARP","RARP-DNS","ICMP","BGP"],"ARP asks 'who has this IP?' and the owner replies with its MAC address."],
+["What does NAT mainly allow a home network to do?",["Share one public IP among many devices","Speed up downloads","Block all viruses","Create VLANs"],"NAT rewrites private addresses so many devices appear as one public address."]
+];
+const BANK={db:DB.map(x=>({t:'db',q:x[0],o:x[1],e:x[2]})),net:NET.map(x=>({t:'net',q:x[0],o:x[1],e:x[2]}))};
+const NAME={db:'Databases',net:'Networks'},COL={db:'var(--db)',net:'var(--net)'};
+
+/* ---------- Quiz logic ---------- */
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const show=id=>document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));
+let list,i,score,locked,mode,res;
+
+function start(m){
+  mode=m;
+  list=m==='mix'?shuffle([...shuffle(BANK.db).slice(0,5),...shuffle(BANK.net).slice(0,5)]):shuffle(BANK[m]);
+  i=0;score=0;res={db:[0,0],net:[0,0]};
+  $('#track').innerHTML=list.map(()=>'<span></span>').join('');
+  show('quiz');render();
+}
+function render(){
+  const q=list[i];locked=false;
+  document.getElementById('quiz').style.setProperty('--a',COL[q.t]);
+  $('#tag').textContent=NAME[q.t]+'  ·  Question '+(i+1)+' of '+list.length;
+  $('#q').textContent=q.q;
+  $('#score').textContent='Score '+score;
+  [...$('#track').children].forEach((s,k)=>{if(k===i)s.className='cur'});
+  $('#opts').innerHTML='';
+  shuffle(q.o.map((t,k)=>({t,ok:k===0}))).forEach((o,k)=>{
+    const b=document.createElement('button');b.className='opt';b.dataset.ok=o.ok;
+    b.innerHTML='<kbd>'+(k+1)+'</kbd><span></span>';b.lastChild.textContent=o.t;
+    b.onclick=()=>pick(b);$('#opts').append(b);
+  });
+  $('#why').className='why';$('#next').hidden=true;
+  $('#next').textContent=i===list.length-1?'See results':'Next question';
+}
+function pick(b){
+  if(locked)return;locked=true;
+  const q=list[i],ok=b.dataset.ok==='true';
+  res[q.t][1]++;if(ok){score++;res[q.t][0]++}
+  document.querySelectorAll('.opt').forEach(o=>{o.disabled=true;
+    if(o.dataset.ok==='true')o.classList.add('right');
+    else if(o===b)o.classList.add('wrong');else o.classList.add('dim')});
+  $('#track').children[i].className=ok?'ok':'bad';
+  $('#score').textContent='Score '+score;
+  $('#why').textContent=(ok?'Correct. ':'Not quite. ')+q.e;$('#why').classList.add('on');
+  $('#next').hidden=false;$('#next').focus();
+}
+function finish(){
+  show('end');
+  const n=list.length,p=Math.round(score/n*100);
+  $('#msg').textContent=p===100?'Flawless. Zero packets dropped.':p>=70?'Strong run. Your packet got through.':p>=40?'Halfway there. Review and retry.':'Connection timed out. Try again.';
+  $('#pct').textContent=p+'%';
+  $('#split').innerHTML=Object.keys(res).filter(k=>res[k][1]).map(k=>'<div><b style="color:'+COL[k]+'">'+res[k][0]+'/'+res[k][1]+'</b><br>'+NAME[k]+'</div>').join('');
+  $('#fg').style.strokeDashoffset=540.4;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$('#fg').style.strokeDashoffset=540.4*(1-p/100)));
+}
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>start(b.dataset.m));
+$('#next').onclick=()=>{i++;i<list.length?render():finish()};
+$('#again').onclick=()=>start(mode);
+$('#home2').onclick=()=>show('home');
+addEventListener('keydown',e=>{
+  if(!$('#quiz').classList.contains('on'))return;
+  const n=+e.key;if(n>=1&&n<=4&&!locked){const b=document.querySelectorAll('.opt')[n-1];b&&pick(b)}
+  if(e.key==='Enter'&&locked&&document.activeElement!==$('#next')){$('#next').click()}
+});
+
+/* ---------- Animated network background ---------- */
+const cv=$('#bg'),c=cv.getContext('2d'),still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let W,H,P=[],m={x:-999,y:-999};
+function size(){W=cv.width=innerWidth;H=cv.height=innerHeight;
+  P=Array.from({length:Math.min(80,W/16|0)},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.45,vy:(Math.random()-.5)*.45}))}
+function tick(){
+  c.clearRect(0,0,W,H);
+  P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1});
+  for(let a=0;a<P.length;a++){
+    const p=P[a];
+    for(let b=a+1;b<P.length;b++){const q=P[b],d=Math.hypot(p.x-q.x,p.y-q.y);
+      if(d<130){c.strokeStyle='rgba(170,160,255,'+.2*(1-d/130)+')';c.beginPath();c.moveTo(p.x,p.y);c.lineTo(q.x,q.y);c.stroke()}}
+    const d=Math.hypot(p.x-m.x,p.y-m.y);
+    if(d<190){c.strokeStyle='rgba(63,224,208,'+.6*(1-d/190)+')';c.beginPath();c.moveTo(p.x,p.y);c.lineTo(m.x,m.y);c.stroke()}
+    c.fillStyle='rgba(214,208,255,.75)';c.beginPath();c.arc(p.x,p.y,1.8,0,7);c.fill();
+  }
+  if(!still)requestAnimationFrame(tick);
+}
+addEventListener('resize',size);
+addEventListener('pointermove',e=>{m.x=e.clientX;m.y=e.clientY});
+size();tick();
+</script>
+</body>
+</html>
