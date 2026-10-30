@@ -11,7 +11,7 @@
 :root{--bg:#140f3a;--bg2:#1f1858;--ink:#f4f1ff;--mute:#a9a3d6;--db:#3fe0d0;--net:#ff6b5e;--gold:#ffd66b;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);--a:var(--db)}
 *{box-sizing:border-box;margin:0}
 html,body{min-height:100%}
-body{font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:radial-gradient(1200px 700px at 80% -10%,#3b2a9a 0%,transparent 60%),radial-gradient(900px 600px at 0% 110%,#7a2a62 0%,transparent 55%),var(--bg);line-height:1.5;overflow-x:hidden}
+body{font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:radial-gradient(1200px 700px at 80% -10%,#3b2a9a 0%,transparent 60%),radial-gradient(900px 600px at 0% 110%,#7a2a62 0%,transparent 70%),linear-gradient(120deg,#140f3a 0%,#1f1858 100%)}
 #bg{position:fixed;inset:0;z-index:0}
 main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:clamp(20px,5vw,56px) 20px}
 section{display:none}section.on{display:block}
@@ -22,7 +22,7 @@ h1{font-size:clamp(2.6rem,8vw,5.6rem);font-weight:800;letter-spacing:-.03em;max-
 h1 span{background:linear-gradient(90deg,var(--db),var(--gold) 50%,var(--net));-webkit-background-clip:text;background-clip:text;color:transparent}
 .lead{color:var(--mute);font-size:1.15rem;max-width:46ch;margin:22px 0 40px}
 .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
-.mode{all:unset;box-sizing:border-box;cursor:pointer;padding:24px;border-radius:28px 28px 28px 6px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(10px);transition:transform .25s,border-color .25s,background .25s;position:relative;overflow:hidden}
+.mode{all:unset;box-sizing:border-box;position:relative;cursor:pointer;padding:24px;border-radius:28px 28px 28px 6px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(10px);transition:transform .25s,border-color .25s,background .25s;overflow:hidden}
 .mode:nth-child(2){border-radius:28px 28px 6px 28px}
 .mode:nth-child(3){border-radius:6px 28px 28px 28px}
 .mode::after{content:"";position:absolute;right:-40px;top:-40px;width:130px;height:130px;border-radius:50%;background:var(--c);opacity:.22;filter:blur(8px);transition:opacity .25s,transform .25s}
@@ -41,7 +41,7 @@ h1 span{background:linear-gradient(90deg,var(--db),var(--gold) 50%,var(--net));-
 .tag{display:inline-block;padding:5px 14px;border-radius:99px;border:1px solid var(--a);color:var(--a);font-weight:700;font-size:.85rem;margin-bottom:18px}
 .q{font-size:clamp(1.7rem,4.6vw,2.8rem);font-weight:800;letter-spacing:-.02em;max-width:24ch}
 .opts{display:grid;gap:12px;margin:32px 0 20px;max-width:680px}
-.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:16px;align-items:center;padding:16px 20px;border-radius:18px;background:var(--card);border:1px solid var(--line);transition:transform .2s,border-color .2s,background .2s}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:16px;align-items:center;padding:16px 20px;border-radius:18px;background:var(--card);border:1px solid var(--line);transition:transform .18s,border-color .18s,background .18s}
 .opt kbd{font:700 .9rem 'DM Sans';width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.1);flex:none}
 .opt:hover:not([disabled]),.opt:focus-visible{transform:translateX(8px);border-color:var(--a)}
 .opt[disabled]{cursor:default}
@@ -94,7 +94,19 @@ h1 span{background:linear-gradient(90deg,var(--db),var(--gold) 50%,var(--net));-
 <section id="end">
   <div class="brand"><i></i>QueryRoute</div>
   <h2 id="msg" style="font-size:clamp(2rem,6vw,3.6rem);max-width:16ch"></h2>
-  <div class="ring"><svg width="200" height="200" viewBox="0 0 200 200"><defs><linearGradient id="g"><stop offset="0" stop-color="#3fe0d0"/><stop offset="1" stop-color="#ff6b5e"/></linearGradient></defs><circle class="bgc" cx="100" cy="100" r="86"/><circle class="fg" id="fg" cx="100" cy="100" r="86" stroke-dasharray="540.4" stroke-dashoffset="540.4"/></svg><div id="pct"></div></div>
+  <div class="ring">
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="g">
+          <stop offset="0" stop-color="#3fe0d0"/>
+          <stop offset="1" stop-color="#ff6b5e"/>
+        </linearGradient>
+      </defs>
+      <circle class="bgc" cx="100" cy="100" r="86"></circle>
+      <circle id="fg" class="fg" cx="100" cy="100" r="86"></circle>
+    </svg>
+    <div id="pct">0%</div>
+  </div>
   <div class="split" id="split"></div>
   <button class="btn" id="again">Play again</button><button class="btn ghost" id="home2">Choose a track</button>
 </section>
@@ -108,11 +120,12 @@ const DB=[
 ["What does the I in ACID stand for?",["Isolation","Integrity","Indexing","Inheritance"],"Isolation means concurrent transactions do not see each other's unfinished work."],
 ["Which key uniquely identifies each row in a table?",["Primary key","Foreign key","Composite index","Candidate view"],"A primary key is unique and not null, and identifies exactly one row."],
 ["Which join returns all rows from the left table plus matches from the right?",["LEFT JOIN","INNER JOIN","CROSS JOIN","SELF JOIN"],"Unmatched left rows still appear, with NULLs in the right-hand columns."],
-["Why do we create an index on a column?",["To speed up lookups","To save disk space","To enforce ACID","To encrypt the column"],"An index (often a B-tree) avoids scanning the whole table, at the cost of slower writes."],
+["Which command removes all rows from a table but keeps the structure?",["DELETE","DROP TABLE","TRUNCATE","ALTER"],"DELETE removes rows, TRUNCATE removes all rows quickly, and DROP TABLE removes the table itself."],
+["Why do we create an index on a column?",["To speed up lookups","To save disk space","To enforce ACID","To encrypt the column"],"An index (often a B-tree) avoids scanning the whole table, at the cost of extra storage and maintenance."],
 ["Which of these is a DDL command?",["CREATE TABLE","SELECT","INSERT","COMMIT"],"DDL defines structure: CREATE, ALTER, DROP. SELECT and INSERT are DML."],
 ["What does a foreign key enforce?",["Referential integrity","Row ordering","Column encryption","Query caching"],"It guarantees a value must exist in the referenced parent table."],
 ["Which command makes a transaction's changes permanent?",["COMMIT","ROLLBACK","SAVEPOINT","TRUNCATE"],"COMMIT saves changes. ROLLBACK undoes them."],
-["Which type of database stores data as key-value pairs or documents?",["NoSQL","Relational","Star schema","Data warehouse"],"NoSQL stores such as Redis and MongoDB trade fixed schemas for flexibility and scale."]
+["Which type of database stores data as key-value pairs or documents?",["NoSQL","Relational","Star schema","Data warehouse"],"NoSQL stores such as Redis and MongoDB trade fixed schemas for flexibility and scale."],
 ];
 const NET=[
 ["Which OSI layer is responsible for routing packets between networks?",["Network layer","Data link layer","Transport layer","Session layer"],"Layer 3 uses IP addresses to route packets across networks."],
@@ -124,7 +137,7 @@ const NET=[
 ["Which device forwards packets between different networks using IP addresses?",["Router","Hub","Repeater","Switch"],"Switches work inside a LAN by MAC address. Routers connect networks by IP."],
 ["What is the TCP three-way handshake?",["SYN, SYN-ACK, ACK","ACK, SYN, FIN","SYN, ACK, FIN","HELLO, OK, GO"],"Both sides agree on sequence numbers before any data is sent."],
 ["Which protocol resolves an IP address to a MAC address on a LAN?",["ARP","RARP-DNS","ICMP","BGP"],"ARP asks 'who has this IP?' and the owner replies with its MAC address."],
-["What does NAT mainly allow a home network to do?",["Share one public IP among many devices","Speed up downloads","Block all viruses","Create VLANs"],"NAT rewrites private addresses so many devices appear as one public address."]
+["What does NAT mainly allow a home network to do?",["Share one public IP among many devices","Speed up downloads","Block all viruses","Create VLANs"],"NAT rewrites private addresses so many devices can share one public address."],
 ];
 const BANK={db:DB.map(x=>({t:'db',q:x[0],o:x[1],e:x[2]})),net:NET.map(x=>({t:'net',q:x[0],o:x[1],e:x[2]}))};
 const NAME={db:'Databases',net:'Networks'},COL={db:'var(--db)',net:'var(--net)'};
@@ -173,11 +186,17 @@ function pick(b){
 function finish(){
   show('end');
   const n=list.length,p=Math.round(score/n*100);
+  const pctEl=$('#pct');
+  const fgEl=$('#fg');
   $('#msg').textContent=p===100?'Flawless. Zero packets dropped.':p>=70?'Strong run. Your packet got through.':p>=40?'Halfway there. Review and retry.':'Connection timed out. Try again.';
-  $('#pct').textContent=p+'%';
+  if(pctEl)pctEl.textContent=p+'%';
   $('#split').innerHTML=Object.keys(res).filter(k=>res[k][1]).map(k=>'<div><b style="color:'+COL[k]+'">'+res[k][0]+'/'+res[k][1]+'</b><br>'+NAME[k]+'</div>').join('');
-  $('#fg').style.strokeDashoffset=540.4;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>$('#fg').style.strokeDashoffset=540.4*(1-p/100)));
+  if(fgEl){
+    const circumference=2*Math.PI*86;
+    fgEl.style.strokeDasharray=String(circumference);
+    fgEl.style.strokeDashoffset=circumference;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>fgEl.style.strokeDashoffset=circumference*(1-p/100)));
+  }
 }
 document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>start(b.dataset.m));
 $('#next').onclick=()=>{i++;i<list.length?render():finish()};
